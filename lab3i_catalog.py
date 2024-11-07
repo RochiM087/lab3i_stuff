@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk, Toplevel
 from datetime import datetime
 from tkinter import *
 from PIL import Image, ImageTk
@@ -30,6 +30,40 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+#
+def abrir_janela_add():
+    janela_add = Toplevel(root)
+    janela_add.title("Adicionar Item")
+
+    janela_add.geometry("900x360+140+170")
+    janela_add.configure(background="#166ba9")
+
+    for i in range(6):
+        janela_add.columnconfigure(i, minsize=150, weight=1)
+        janela_add.rowconfigure(i, minsize=60, weight=1)
+
+    tk.Label(janela_add, text="Nome", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+    tk.Label(janela_add, text="Descrição", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+    tk.Label(janela_add, text="Categoria", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+    tk.Label(janela_add, text="Quantidade", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+
+    nome_entry = tk.Entry(janela_add)
+    nome_entry.grid(row=0, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+
+    descricao_entry = tk.Entry(janela_add)
+    descricao_entry.grid(row=1, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+
+    categoria_entry = tk.Entry(janela_add)
+    categoria_entry.grid(row=2, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+
+    quantidade_entry = tk.Entry(janela_add)
+    quantidade_entry.grid(row=3, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+
+    tk.Button(janela_add, text='Adicionar Item', font=("Verdana", 14), command=lambda: adicionar_item_interface(nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get(), janela=janela_add), bg="#4CAF50", fg="white").grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_add, text='Cancelar', font=("Verdana", 14), command=janela_add.destroy, bg="#F44336", fg="white").grid(row=5, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
+
+
+
 # Funções para gerenciar itens no banco de dados
 def adicionar_item(nome, descricao, categoria, quantidade):
     item = Item(nome=nome, descricao=descricao, categoria=categoria, quantidade=quantidade)
@@ -39,12 +73,20 @@ def adicionar_item(nome, descricao, categoria, quantidade):
 def listar_itens():
     return session.query(Item).all()
 
-def buscar_item(nome=None, item_id=None):
-    if item_id:
-        return session.query(Item).filter_by(id=item_id).first()
-    elif nome:
-        return session.query(Item).filter(Item.nome.like(f"%{nome}%")).all()
-    return []
+def buscar_item(query, tipo):
+    if tipo == "Nome":
+        return session.query(Item).filter(Item.nome.like(f"%{query}%")).all()
+    elif tipo == "ID":
+        try:
+            return session.query(Item).filter_by(id=int(query)).all()
+        except:
+            return []
+    elif tipo == "Descrição":
+        return session.query(Item).filter(Item.descricao.like(f"%{query}%")).all()
+    elif tipo == "Categoria":
+        return session.query(Item).filter(Item.categoria.like(f"%{query}%")).all()
+    else:
+        return []
 
 def remover_item(item_id):
     item = session.query(Item).filter_by(id=item_id).first()
@@ -88,44 +130,70 @@ def marcar_em_uso(item_id):
     else:
         messagebox.showerror("Erro", "Item não encontrado!")
 
-def listar_itens_interface():
-    lista.delete(0, tk.END)
-    itens = listar_itens()
-    for item in itens:
-        status_emprestado = "Emprestado" if item.emprestado else "Disponível"
-        status_em_uso = "Em Uso" if item.em_uso else "Não em Uso"
-        horario = item.horario_emprestimo.strftime('%Y-%m-%d %H:%M:%S') if item.horario_emprestimo else "N/A"
-        pessoa = item.pessoa_emprestou if item.pessoa_emprestou else "N/A"
-        lista.insert(tk.END, f'ID: {item.id} - {item.nome} ({item.categoria}): {status_emprestado} | {status_em_uso} | Quantidade: {item.quantidade} | Emprestado por: {pessoa} às {horario}')
+# Listar itens
+def listar_itens_interface(itens):
+    #lista.delete(0, tk.END)
+    lista.delete(*lista.get_children())
+
+    if itens == []:
+        return
+
+    for it in itens:
+        lista.insert("", "end", values=(
+        it.id, # ID
+        it.nome, # Nome
+        it.categoria, # Categoria
+        it.descricao, # Descrição
+        it.quantidade, #Quantidade
+        "N/A", # Quantidade disponível
+        "Em Uso" if it.em_uso else "Não em Uso", # Estado
+        it.pessoa_emprestou # Empréstimos
+        ))
+
+
 
 # Interface Gráfica com Tkinter
 root = tk.Tk()
 root.title("Catálogo de Itens Lab3i")
-root.geometry("1024x700")  # Resolução base
+root.geometry("1080x700")  # Resolução base
 root.configure(background="#166ba9")
 root.resizable(True, True)  # Torna a janela redimensionável
 
 # Função para adicionar item via interface
-def adicionar_item_interface():
-    nome = nome_entry.get()
-    descricao = descricao_entry.get()
-    categoria = categoria_entry.get()
-    quantidade = quantidade_entry.get()
-
+def adicionar_item_interface(nome, descricao, categoria, quantidade, janela):
     if nome and quantidade.isdigit():
         adicionar_item(nome, descricao, categoria, int(quantidade))
-        listar_itens_interface()
+        listar_itens_interface(listar_itens())
+        janela.destroy()
     else:
         messagebox.showerror("Erro", "Nome e quantidade são obrigatórios!")
 
 # Função para remover item via interface
 def remover_item_interface():
-    item_id = id_entry.get()
-    if item_id.isdigit():
-        remover_item(int(item_id))
-        listar_itens_interface()
+    def abrir_janela_remover(item_id):
+        janela_rmv = Toplevel(root)
+        janela_rmv.title("Remover Item")
+        janela_rmv.configure(background="#166ba9")
+
+
+        tk.Label(janela_rmv, text="Essa ação não pode ser desfeita, deseja remover o item?", font=("Verdana", 14), fg="white", bg="#166ba9").grid(row=0, column=0, columnspan=2, padx=10, pady=(15,10), sticky="ew")
+
+        tk.Button(janela_rmv, text='Confirmar', font=("Verdana", 14), command=lambda: [remover_item(item_id),listar_itens_interface(listar_itens()), janela_rmv.destroy()], bg="#F44336", fg="white").grid(row=1, column=0, padx=10, pady=(15,10), sticky="ew")
+        tk.Button(janela_rmv, text='Cancelar', font=("Verdana", 14), command=janela_rmv.destroy, bg="#235da3", fg="white").grid(row=1, column=1, padx=10, pady=(15,10), sticky="ew")
+
+    id_lista = lista.selection()
+    if id_lista:
+        item_data = lista.item(id_lista)
+        item_id = item_data["values"][0]
+
+        if isinstance(item_id, int):
+            abrir_janela_remover(int(item_id))
+        else:
+            messagebox.showerror("Erro", "ID inválido!")
     else:
-        messagebox.showerror("Erro", "ID inválido!")
+        messagebox.showerror("Erro", "Nenhum item selecionado!")
+
+
 
 # Função para marcar item como emprestado via interface
 def marcar_emprestado_interface():
@@ -157,37 +225,55 @@ def marcar_em_uso_interface():
     else:
         messagebox.showerror("Erro", "ID inválido!")
 
-# Função para buscar itens pelo nome ou ID
-def buscar_item_interface():
-    nome = nome_entry.get()
-    item_id = id_entry.get()
-    
-    lista.delete(0, tk.END)
-    if item_id.isdigit():
-        item = buscar_item(item_id=int(item_id))
-        if item:
-            status_emprestado = "Emprestado" if item.emprestado else "Disponível"
-            status_em_uso = "Em Uso" if item.em_uso else "Não em Uso"
-            horario = item.horario_emprestimo.strftime('%Y-%m-%d %H:%M:%S') if item.horario_emprestimo else "N/A"
-            pessoa = item.pessoa_emprestou if item.pessoa_emprestou else "N/A"
-            lista.insert(tk.END, f'ID: {item.id} - {item.nome} ({item.categoria}): {status_emprestado} | {status_em_uso} | Quantidade: {item.quantidade} | Emprestado por: {pessoa} às {horario}')
-        else:
-            lista.insert(tk.END, "Item não encontrado!")
-    elif nome:
-        itens = buscar_item(nome=nome)
-        for item in itens:
-            status_emprestado = "Emprestado" if item.emprestado else "Disponível"
-            status_em_uso = "Em Uso" if item.em_uso else "Não em Uso"
-            horario = item.horario_emprestimo.strftime('%Y-%m-%d %H:%M:%S') if item.horario_emprestimo else "N/A"
-            pessoa = item.pessoa_emprestou if item.pessoa_emprestou else "N/A"
-            lista.insert(tk.END, f'ID: {item.id} - {item.nome} ({item.categoria}): {status_emprestado} | {status_em_uso} | Quantidade: {item.quantidade} | Emprestado por: {pessoa} às {horario}')
+
+# Busca ao detectar uma mudança na barra de busca
+def handle_busca(event):
+    busca_query = busca_entry.get()
+    tipo = busca_dropdown.get()
+    listar_itens_interface(buscar_item(busca_query, tipo))
+
+# Habilita o estado do botão de remover item
+def handle_botao_remover(event):
+    if lista.selection():
+        remover_button.config(state="normal")
     else:
-        messagebox.showerror("Erro", "Preencha o campo de busca!")
+        remover_button.config(state="disabled")
 
 # Configuração do layout ajustável
-root.columnconfigure(0, weight=1)
-root.columnconfigure(1, weight=1)
-root.rowconfigure(11, weight=1)
+for i in range(12):
+    root.columnconfigure(i, minsize=90, weight=1)
+
+root.rowconfigure(1,minsize=420, weight=1)
+
+# Barra de busca
+busca_entry = tk.Entry(root, bd=0, relief="flat")
+busca_entry.grid(row=0, column=0, columnspan=10, padx=(5,0), pady=5, sticky="ew")
+
+dropdown_options = ["Nome", "ID", "Descrição", "Categoria"]
+busca_dropdown = ttk.Combobox(root, values=dropdown_options, state="readonly")
+busca_dropdown.grid(row=0, column=10, columnspan=2, padx=(0,5), pady=5, sticky="ew")
+busca_dropdown.set("Nome")
+
+busca_entry.bind("<KeyRelease>", handle_busca)
+busca_dropdown.bind("<KeyRelease>", handle_busca)
+
+# Lista de Itens
+colunas_lista = ["ID", "Nome", "Categoria", "Descrição", "Quantidade", "Disponível", "Estado", "Empréstimos"]
+lista = ttk.Treeview(root, columns=colunas_lista, show="headings")
+lista.grid(row=1, column=0, columnspan=12, sticky="nsew")
+
+for it in colunas_lista:
+    lista.heading(it, text=it)
+    lista.column(it, anchor="center")
+
+lista_rolagem_horizontal = ttk.Scrollbar(root, orient="horizontal", command=lista.xview)
+lista.configure(xscrollcommand=lista_rolagem_horizontal.set)
+
+lista_rolagem_horizontal.grid(row=2, column=0, columnspan=12, sticky="ew")
+
+'''# Lista de Itens
+lista = tk.Listbox(root, width=80, height=24)
+lista.grid(row=1, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
 
 # Labels e Campos de Entrada
 tk.Label(root, text="Nome", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=0, column=0, padx=10, pady=5, sticky="ew")
@@ -213,25 +299,25 @@ id_entry = tk.Entry(root)
 id_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
 
 pessoa_entry = tk.Entry(root)
-pessoa_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
+pessoa_entry.grid(row=5, column=1, padx=10, pady=5, sticky="ew")'''
 
 # Botões
-tk.Button(root, text='Adicionar Item', font=("Verdana", 14), command=adicionar_item_interface, bg="#4CAF50", fg="white").grid(row=6, column=0, padx=10, pady=10, sticky="ew")
-tk.Button(root, text='Remover Item', font=("Verdana", 14), command=remover_item_interface, bg="#F44336", fg="white").grid(row=6, column=1, padx=10, pady=10, sticky="ew")
-tk.Button(root, text='Marcar como Emprestado', font=("Verdana", 14), command=marcar_emprestado_interface, bg="#235da3", fg="white").grid(row=7, column=0, padx=10, pady=10, sticky="ew")
-tk.Button(root, text='Marcar como Devolvido', font=("Verdana", 14), command=marcar_devolvido_interface, bg="#235da3", fg="white").grid(row=7, column=1, padx=10, pady=10, sticky="ew")
-tk.Button(root, text='Marcar como Em Uso', font=("Verdana", 14), command=marcar_em_uso_interface, bg="#235da3", fg="white").grid(row=8, column=0, padx=10, pady=10, sticky="ew")
-tk.Button(root, text='Buscar Item', font=("Verdana", 14), command=buscar_item_interface, bg="#235da3", fg="white").grid(row=8, column=1, padx=10, pady=10, sticky="ew")
 
-# Lista de Itens
-lista = tk.Listbox(root, width=80, height=10)
-lista.grid(row=11, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+tk.Button(root, text='Adicionar Item', font=("Verdana", 14), command=abrir_janela_add, bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=4, padx=10, pady=10, sticky="ew")
+tk.Button(root, text='Atualizar Item', font=("Verdana", 14), command=(), bg="#235da3", fg="white").grid(row=3, column=4, columnspan=4, padx=10, pady=10, sticky="ew")
+
+remover_button = tk.Button(root, text='Remover Item', font=("Verdana", 14), command=remover_item_interface, bg="#F44336", fg="white")
+remover_button.grid(row=3, column=8, columnspan=4, padx=10, pady=10, sticky="ew")
+remover_button.config(state="disabled")
+lista.bind("<<TreeviewSelect>>", handle_botao_remover)
+
+tk.Button(root, text='Marcar como Emprestado', font=("Verdana", 14), command=marcar_emprestado_interface, bg="#235da3", fg="white").grid(row=4, column=0, columnspan=4, padx=10, pady=10, sticky="ew")
+tk.Button(root, text='Marcar como Devolvido', font=("Verdana", 14), command=marcar_devolvido_interface, bg="#235da3", fg="white").grid(row=4, column=4, columnspan=4, padx=10, pady=10, sticky="ew")
+tk.Button(root, text='Marcar como Em Uso', font=("Verdana", 14), command=marcar_em_uso_interface, bg="#235da3", fg="white").grid(row=4, column=8, columnspan=4, padx=10, pady=10, sticky="ew")
 
 # Botão para listar itens
-tk.Button(root, text='Listar Todos os Itens', font=("Verdana", 14), command=listar_itens_interface, bg="#235da3", fg="white").grid(row=12, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+tk.Button(root, text='Listar Todos os Itens', font=("Verdana", 14), command=lambda: listar_itens_interface(listar_itens()), bg="#235da3", fg="white").grid(row=12, column=0, columnspan=12, padx=10, pady=10, sticky="ew")
 
 # Iniciar a interface
-listar_itens_interface()
+listar_itens_interface(listar_itens())
 root.mainloop()
-
-
