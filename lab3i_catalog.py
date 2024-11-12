@@ -184,7 +184,7 @@ def abrir_janela_devolucao():
     quantidade_entry = tk.Entry(janela_devol)
     quantidade_entry.grid(row=1, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
 
-    tk.Button(janela_devol, text='Emprestar', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_devol, text='Devolver', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
     tk.Button(janela_devol, text='Cancelar', font=("Verdana", 14), command=janela_devol.destroy, bg="#F44336", fg="white").grid(row=3, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
 
 
