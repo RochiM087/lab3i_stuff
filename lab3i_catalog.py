@@ -32,16 +32,20 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def geometry_janela(width, height):
+    return f"{width}x{height}+{int((root.winfo_screenwidth()-width)/2)}+{int((root.winfo_screenheight()-height)/2)}"
+
 # Janelas abertas pelos botões
 def abrir_janela_add():
     janela_add = Toplevel(root)
     janela_add.title("Adicionar Item")
 
-    janela_add.geometry("900x360+140+170")
+    janela_add.geometry(geometry_janela(900, 300))
     janela_add.configure(background="#166ba9")
 
     for i in range(6):
         janela_add.columnconfigure(i, minsize=150, weight=1)
+    for i in range(5):
         janela_add.rowconfigure(i, minsize=60, weight=1)
 
     tk.Label(janela_add, text="Nome", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
@@ -61,8 +65,8 @@ def abrir_janela_add():
     quantidade_entry = tk.Entry(janela_add)
     quantidade_entry.grid(row=3, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
 
-    tk.Button(janela_add, text='Adicionar Item', font=("Verdana", 14), command=lambda: [adicionar_item_interface(nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get()), janela_add.destroy()], bg="#4CAF50", fg="white").grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
-    tk.Button(janela_add, text='Cancelar', font=("Verdana", 14), command=janela_add.destroy, bg="#F44336", fg="white").grid(row=5, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_add, text='Adicionar Item', font=("Verdana", 14), command=lambda: [adicionar_item_interface(nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get()), janela_add.destroy()], bg="#4CAF50", fg="white").grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_add, text='Cancelar', font=("Verdana", 14), command=janela_add.destroy, bg="#F44336", fg="white").grid(row=4, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
 
 def abrir_janela_updt():
     id_lista = lista.selection()
@@ -78,12 +82,12 @@ def abrir_janela_updt():
     janela_updt = Toplevel(root)
     janela_updt.title("Atualizar Item")
 
-    janela_updt.geometry("900x540+140+170")
+    janela_updt.geometry(geometry_janela(900, 450))
     janela_updt.configure(background="#166ba9")
 
     for i in range(6):
         janela_updt.columnconfigure(i, minsize=150, weight=1)
-    for i in range(8):
+    for i in range(7):
         janela_updt.rowconfigure(i, minsize=60, weight=1)
 
     
@@ -119,8 +123,8 @@ def abrir_janela_updt():
     disponivel_entry.grid(row=5, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
     disponivel_entry.insert(0, item.disponivel)
 
-    tk.Button(janela_updt, text='Atualizar Item', font=("Verdana", 14), command=lambda: [atualizar_item_interface(item_id = item.id, nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get(), disponivel=disponivel_entry.get()), janela_updt.destroy()], bg="#4CAF50", fg="white").grid(row=7, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
-    tk.Button(janela_updt, text='Cancelar', font=("Verdana", 14), command=janela_updt.destroy, bg="#F44336", fg="white").grid(row=7, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_updt, text='Atualizar Item', font=("Verdana", 14), command=lambda: [atualizar_item_interface(item_id = item.id, nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get(), disponivel=disponivel_entry.get()), janela_updt.destroy()], bg="#4CAF50", fg="white").grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_updt, text='Cancelar', font=("Verdana", 14), command=janela_updt.destroy, bg="#F44336", fg="white").grid(row=6, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
 
 def abrir_janela_emprestimo():
     id_lista = lista.selection()
@@ -134,11 +138,12 @@ def abrir_janela_emprestimo():
     janela_emp = Toplevel(root)
     janela_emp.title("Emprestar Item")
 
-    janela_emp.geometry("600x240+140+170")
+    janela_emp.geometry(geometry_janela(600, 180))
     janela_emp.configure(background="#166ba9")
 
     for i in range(4):
         janela_emp.columnconfigure(i, minsize=150, weight=1)
+    for i in range(3):
         janela_emp.rowconfigure(i, minsize=60, weight=1)
 
     tk.Label(janela_emp, text="Nome da pessoa", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
@@ -150,8 +155,8 @@ def abrir_janela_emprestimo():
     quantidade_entry = tk.Entry(janela_emp)
     quantidade_entry.grid(row=1, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
 
-    tk.Button(janela_emp, text='Emprestar', font=("Verdana", 14), command=lambda: [marcar_emprestado_interface(item_id, pessoa=pessoa_entry.get(), quantidade=quantidade_entry.get()), janela_emp.destroy()], bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
-    tk.Button(janela_emp, text='Cancelar', font=("Verdana", 14), command=janela_emp.destroy, bg="#F44336", fg="white").grid(row=3, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_emp, text='Emprestar', font=("Verdana", 14), command=lambda: [marcar_emprestado_interface(item_id, pessoa=pessoa_entry.get(), quantidade=quantidade_entry.get()), janela_emp.destroy()], bg="#4CAF50", fg="white").grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_emp, text='Cancelar', font=("Verdana", 14), command=janela_emp.destroy, bg="#F44336", fg="white").grid(row=2, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
 
 def abrir_janela_devolucao():
     id_lista = lista.selection()
@@ -167,11 +172,12 @@ def abrir_janela_devolucao():
     janela_devol = Toplevel(root)
     janela_devol.title("Devolver Item")
 
-    janela_devol.geometry("600x240+140+170")
+    janela_devol.geometry(geometry_janela(600, 180))
     janela_devol.configure(background="#166ba9")
 
     for i in range(4):
         janela_devol.columnconfigure(i, minsize=150, weight=1)
+    for i in range(3):
         janela_devol.rowconfigure(i, minsize=60, weight=1)
 
     tk.Label(janela_devol, text="Nome da pessoa", font=("Verdana", 14), fg="white", bg="#235da3", borderwidth=2, relief="groove").grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
@@ -184,8 +190,8 @@ def abrir_janela_devolucao():
     quantidade_entry = tk.Entry(janela_devol)
     quantidade_entry.grid(row=1, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
 
-    tk.Button(janela_devol, text='Devolver', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white").grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
-    tk.Button(janela_devol, text='Cancelar', font=("Verdana", 14), command=janela_devol.destroy, bg="#F44336", fg="white").grid(row=3, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_devol, text='Devolver', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white").grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    tk.Button(janela_devol, text='Cancelar', font=("Verdana", 14), command=janela_devol.destroy, bg="#F44336", fg="white").grid(row=2, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
 
 
 # Funções para gerenciar itens no banco de dados
@@ -338,6 +344,7 @@ def remover_item_interface():
     def abrir_janela_remover(item_id):
         janela_rmv = Toplevel(root)
         janela_rmv.title("Remover Item")
+        janela_rmv.geometry(geometry_janela(520, 120))
         janela_rmv.configure(background="#166ba9")
 
         tk.Label(janela_rmv, text="Essa ação não pode ser desfeita, deseja remover o item?", font=("Verdana", 14), fg="white", bg="#166ba9").grid(row=0, column=0, columnspan=2, padx=10, pady=(15,10), sticky="ew")
