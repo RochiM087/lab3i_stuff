@@ -35,8 +35,18 @@ session = Session()
 def geometry_janela(width, height):
     return f"{width}x{height}+{int((root.winfo_screenwidth()-width)/2)}+{int((root.winfo_screenheight()-height)/2)}"
 
+def is_entry_filled(str): return bool(str.strip())
+
 # Janelas abertas pelos botões
 def abrir_janela_add():
+
+    def handle_entry(event):
+        if is_entry_filled(nome_entry.get()) and is_entry_filled(quantidade_entry.get()):
+            add_button.config(state="normal")
+        else:
+            add_button.config(state="disabled")
+
+
     janela_add = Toplevel(root)
     janela_add.title("Adicionar Item")
 
@@ -55,6 +65,7 @@ def abrir_janela_add():
 
     nome_entry = tk.Entry(janela_add)
     nome_entry.grid(row=0, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+    nome_entry.bind("<KeyRelease>", handle_entry)
 
     descricao_entry = tk.Entry(janela_add)
     descricao_entry.grid(row=1, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
@@ -64,11 +75,23 @@ def abrir_janela_add():
 
     quantidade_entry = tk.Entry(janela_add)
     quantidade_entry.grid(row=3, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
+    quantidade_entry.bind("<KeyRelease>", handle_entry)
 
-    tk.Button(janela_add, text='Adicionar Item', font=("Verdana", 14), command=lambda: [adicionar_item_interface(nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get()), janela_add.destroy()], bg="#4CAF50", fg="white").grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    add_button = tk.Button(janela_add, text='Adicionar Item', font=("Verdana", 14), command=lambda: [adicionar_item_interface(nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get()), janela_add.destroy()], bg="#4CAF50", fg="white")
+    add_button.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    add_button.config(state="disabled")
+
     tk.Button(janela_add, text='Cancelar', font=("Verdana", 14), command=janela_add.destroy, bg="#F44336", fg="white").grid(row=4, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
 
+
 def abrir_janela_updt():
+
+    def handle_entry(event):
+        if is_entry_filled(nome_entry.get()) and is_entry_filled(quantidade_entry.get()) and is_entry_filled(disponivel_entry.get()):
+            att_button.config(state="normal")
+        else:
+            att_button.config(state="disabled")
+
     id_lista = lista.selection()
     if not id_lista:
         messagebox.showerror("Erro", "Seleção inválida!")
@@ -106,6 +129,8 @@ def abrir_janela_updt():
     nome_entry = tk.Entry(janela_updt)
     nome_entry.grid(row=1, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
     nome_entry.insert(0, item.nome)
+    nome_entry.bind("<KeyRelease>", handle_entry)
+
 
     descricao_entry = tk.Entry(janela_updt)
     descricao_entry.grid(row=2, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
@@ -118,15 +143,26 @@ def abrir_janela_updt():
     quantidade_entry = tk.Entry(janela_updt)
     quantidade_entry.grid(row=4, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
     quantidade_entry.insert(0, item.quantidade)
+    quantidade_entry.bind("<KeyRelease>", handle_entry)
 
     disponivel_entry = tk.Entry(janela_updt)
     disponivel_entry.grid(row=5, column=2, columnspan=4, padx=10, pady=5, sticky="ew")
     disponivel_entry.insert(0, item.disponivel)
+    disponivel_entry.bind("<KeyRelease>", handle_entry)
 
-    tk.Button(janela_updt, text='Atualizar Item', font=("Verdana", 14), command=lambda: [atualizar_item_interface(item_id = item.id, nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get(), disponivel=disponivel_entry.get()), janela_updt.destroy()], bg="#4CAF50", fg="white").grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    att_button = tk.Button(janela_updt, text='Atualizar Item', font=("Verdana", 14), command=lambda: [atualizar_item_interface(item_id = item.id, nome=nome_entry.get(),descricao=descricao_entry.get(),categoria=categoria_entry.get(),quantidade=quantidade_entry.get(), disponivel=disponivel_entry.get()), janela_updt.destroy()], bg="#4CAF50", fg="white")
+    att_button.grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+    att_button.config(state="normal")
     tk.Button(janela_updt, text='Cancelar', font=("Verdana", 14), command=janela_updt.destroy, bg="#F44336", fg="white").grid(row=6, column=3, columnspan=3, padx=10, pady=10, sticky="ew")
 
 def abrir_janela_emprestimo():
+
+    def handle_entry(event):
+        if is_entry_filled(pessoa_entry.get()) and is_entry_filled(quantidade_entry.get()):
+            emp_button.config(state="normal")
+        else:
+            emp_button.config(state="disabled")
+
     id_lista = lista.selection()
     if not id_lista:
         messagebox.showerror("Erro", "Seleção inválida!")
@@ -151,14 +187,25 @@ def abrir_janela_emprestimo():
 
     pessoa_entry = tk.Entry(janela_emp)
     pessoa_entry.grid(row=0, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
+    pessoa_entry.bind("<KeyRelease>", handle_entry)
 
     quantidade_entry = tk.Entry(janela_emp)
     quantidade_entry.grid(row=1, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
+    quantidade_entry.bind("<KeyRelease>", handle_entry)
 
-    tk.Button(janela_emp, text='Emprestar', font=("Verdana", 14), command=lambda: [marcar_emprestado_interface(item_id, pessoa=pessoa_entry.get(), quantidade=quantidade_entry.get()), janela_emp.destroy()], bg="#4CAF50", fg="white").grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    emp_button = tk.Button(janela_emp, text='Emprestar', font=("Verdana", 14), command=lambda: [marcar_emprestado_interface(item_id, pessoa=pessoa_entry.get(), quantidade=quantidade_entry.get()), janela_emp.destroy()], bg="#4CAF50", fg="white")
+    emp_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    emp_button.config(state="disabled")
     tk.Button(janela_emp, text='Cancelar', font=("Verdana", 14), command=janela_emp.destroy, bg="#F44336", fg="white").grid(row=2, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
 
 def abrir_janela_devolucao():
+
+    def handle_entry(event):
+        if is_entry_filled(pessoa_dropdown.get()) and is_entry_filled(quantidade_entry.get()):
+            dev_button.config(state="normal")
+        else:
+            dev_button.config(state="disabled")
+
     id_lista = lista.selection()
     if not id_lista:
         messagebox.showerror("Erro", "Seleção inválida!")
@@ -167,7 +214,6 @@ def abrir_janela_devolucao():
     item_data = lista.item(id_lista)
     item_id = item_data["values"][0]
     item = session.query(Item).filter_by(id=item_id).first()
-
 
     janela_devol = Toplevel(root)
     janela_devol.title("Devolver Item")
@@ -186,11 +232,15 @@ def abrir_janela_devolucao():
     pessoa_dropdown_options = [emp["pessoa"] for emp in item.emprestimos]
     pessoa_dropdown = ttk.Combobox(janela_devol, values=pessoa_dropdown_options, state="readonly")
     pessoa_dropdown.grid(row=0, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
+    pessoa_dropdown.bind("<KeyRelease>", handle_busca)
 
     quantidade_entry = tk.Entry(janela_devol)
     quantidade_entry.grid(row=1, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
+    quantidade_entry.bind("<KeyRelease>", handle_entry)
 
-    tk.Button(janela_devol, text='Devolver', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white").grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    dev_button = tk.Button(janela_devol, text='Devolver', font=("Verdana", 14), command=lambda: [marcar_devolvido_interface(item_id, pessoa=pessoa_dropdown.get(), quantidade=quantidade_entry.get()), janela_devol.destroy()], bg="#4CAF50", fg="white")
+    dev_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+    dev_button.config(state="disabled")
     tk.Button(janela_devol, text='Cancelar', font=("Verdana", 14), command=janela_devol.destroy, bg="#F44336", fg="white").grid(row=2, column=2, columnspan=2, padx=10, pady=10, sticky="ew")
 
 
@@ -371,7 +421,7 @@ def marcar_emprestado_interface(item_id, pessoa, quantidade):
         marcar_emprestado(int(item_id), int(quantidade), pessoa)
         listar_itens_interface(listar_itens())
     else:
-        messagebox.showerror("Erro", "ID, quantidade e nome da pessoa são obrigatórios!")
+        messagebox.showerror("Erro", "Quantidade e nome da pessoa são obrigatórios!")
 
 # Função para marcar item como devolvido via interface
 def marcar_devolvido_interface(item_id, pessoa, quantidade):
